@@ -1,10 +1,10 @@
 import std;
 void main() {
   auto cards = stdin.byLine.map!(s =>
-    s.split(':')[1].split('|').map!(x => x.split.map!(to!int).array));
+    s.split(':')[1].split('|').map!(x => x.splitter.map!(to!int).array));
 
   auto wins = cards.map!(card =>
-    setIntersection(card[0].sort, card[1].sort).array.length).array;
+    setIntersection(card[0].sort, card[1].sort).count).array;
 
   wins.map!(cnt => (2L ^^ cnt) / 2).sum.writefln!"Part1: %d";
 
