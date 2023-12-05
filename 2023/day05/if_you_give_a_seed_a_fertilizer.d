@@ -14,6 +14,9 @@ long solve(long seed, long size, T[][] transforms) {
           seed += mapping.to - mapping.from;
           break;
         }
+        // See the "trickyinput.txt" testcase for the reason why this is
+        // necessary in the part 2 (74 -> 14 -> 5). The standard Advent
+        // of Code 2023 testcases don't seem to be able to validate this.
         if (seed < mapping.from && seed + size > mapping.from)
           size = mapping.from - seed;
       }
