@@ -1,4 +1,4 @@
-import std;
+/+dub.sdl:+/ import std;
 
 struct T { ulong newsteps; string dest; }
 struct G { ulong step; string location; }
