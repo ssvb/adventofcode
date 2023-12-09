@@ -1,4 +1,4 @@
-import std;
+/+dub.sdl:+/ import std;
 
 struct T { long to, from, size; }
 
@@ -21,7 +21,7 @@ long solve_part2(long seed, long size, T[][] transforms) {
 }
 
 void main() {
-  auto seeds = readln.strip.split(':').back.split.map!(to!long);
+  auto seeds = readln.find(':').drop(1).splitter.map!(to!long).array;
 
   T[][] transforms;
   foreach (s ; stdin.byLine) {
@@ -29,11 +29,11 @@ void main() {
       transforms ~= new T[](0);
       continue;
     }
-    if (s.strip.empty)
-      continue;
     long to, from, size;
     if (s.formattedRead!"%d %d %d"(to, from, size) == 3)
       transforms.back ~= T(to, from, size);
+    else
+      enforce(s.strip.empty);
   }
 
   seeds.map!(seed => solve_part1(seed, transforms))
