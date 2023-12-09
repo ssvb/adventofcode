@@ -1,22 +1,17 @@
 import std;
 
-long interpolate(bool reverse)(long[] a) {
-  long[] b;
+ElementType!T interpolate(T)(T a) {
+  ElementType!T[] b;
   bool allzero = true;
   foreach (i ; 1 .. a.length) {
     b ~= a[i] - a[i - 1];
-    if (b.back != 0)
-      allzero = false;
+    allzero &= (b.back == 0);
   }
-  if (!allzero) {
-    return reverse ? a.front - interpolate!reverse(b) :
-                     a.back + interpolate!reverse(b);
-  }
-  return reverse ? a.front : a.back;
+  return allzero ? a.back : a.back + interpolate(b);
 }
 
 void main() {
   auto input = stdin.byLine.map!(s => s.splitter.map!(to!long).array).array;
-  input.map!(interpolate!false).sum.writefln!"Part1: %d";
-  input.map!(interpolate!true).sum.writefln!"Part2: %d";
+  input.map!(a => a.interpolate).sum.writefln!"Part1: %d";
+  input.map!(a => a.retro.interpolate).sum.writefln!"Part2: %d";
 }
