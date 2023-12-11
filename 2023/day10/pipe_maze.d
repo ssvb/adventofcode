@@ -8,8 +8,6 @@ void show_grid(char[][] grid) {
 
 void bfs(char[][] grid, char ch) {
   auto height = grid.length.to!int;
-  if (height == 0)
-    return;
   auto width = grid[0].length.to!int;
 
   struct point { int x, y; }
@@ -52,14 +50,9 @@ A solve(char[][] grid, int x, int y, int dir) {
     ['|' : 0, 'L' : -1, 'J' : +1, 'S' : 0],
     ['-' : 0, 'F' : -1, 'L' : +1, 'S' : 0],
   ];
-
   auto contour = grid.map!(row => '.'.repeat(row.length).array).array;
-  int cycle_length = 0;
 
-  foreach (ref row ; contour)
-    row[] = '.';
-
-  void mark_sides(int x, int y, int dir) {
+  void update_contour(int x, int y, int dir) {
     auto left = &contour[y + dir2dxdy[(4 + dir - 1) % 4][1]]
                         [x + dir2dxdy[(4 + dir - 1) % 4][0]];
     auto right = &contour[y + dir2dxdy[(4 + dir + 1) % 4][1]]
@@ -68,20 +61,19 @@ A solve(char[][] grid, int x, int y, int dir) {
       *left = 'l';
     if (*right == '.')
       *right = 'r';
+    contour[y][x] = '#';
   }
 
-  contour[y][x] = '#';
+  update_contour(x, y, dir);
   do {
     x += dir2dxdy[dir][0];
     y += dir2dxdy[dir][1];
-    mark_sides(x, y, dir);
-    cycle_length++;
+    update_contour(x, y, dir);
     if (auto dirdiff = (grid[y][x] in dirchange[dir]))
       dir = (4 + dir + *dirdiff) % 4;
     else
-      return A(0, 0); // a dead end
-    contour[y][x] = '#';
-    mark_sides(x, y, dir);
+      return A(0, 0); // stuck in a dead end
+    update_contour(x, y, dir);
   } while (grid[y][x] != 'S');
 
   bfs(contour, 'l');
@@ -89,16 +81,15 @@ A solve(char[][] grid, int x, int y, int dir) {
   version (verbose)
     show_grid(contour);
 
-  assert(cycle_length % 2 == 0);
-  return A(cycle_length / 2,
-           contour.joiner.count(contour[0][0] == 'l' ? 'r' : 'l'));
+  auto enclosed_side = (contour[0][0] == 'l' ? 'r' : 'l');
+  return A(contour.joiner.count('#') / 2, contour.joiner.count(enclosed_side));
 }
 
 void main() {
-  // add an extra padding of '.'
-  auto grid = stdin.byLineCopy.map!(x => ("." ~ x.strip ~ ".").dup).array;
-  grid = '.'.repeat(grid[0].length).array ~ grid;
-  grid ~= '.'.repeat(grid[0].length).array;
+  // add an extra padding filled with dots around the grid
+  auto grid = stdin.byLine.map!(x => ("." ~ x.strip ~ ".").dup).array;
+  grid = '.'.repeat(grid[0].length).array ~ grid ~
+         '.'.repeat(grid[0].length).array;
 
   A[] results;
   foreach (y ; 0 .. grid.length.to!int) {
